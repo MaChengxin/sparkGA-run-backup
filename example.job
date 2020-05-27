@@ -1,0 +1,59 @@
+#!/bin/bash 
+#SBATCH -N 3                           #request 3 nodes
+#SBATCH -t 1:10:00                  #job to run for 10 minutes
+#SBATCH --ntasks-per-node 6   #4 tasks per node
+#SBATCH --cpus-per-task 4       #4 cpus per task
+#SBATCH --output=spark.out
+
+module load pre2019
+module load python                 # load python,spark, and java modules
+#module load spark
+module load java/oracle/8u73
+
+SPARK_HOME=~/tahmad/spark
+export PATH=$SPARK_HOME/bin:$PATH
+
+nodes=($(scontrol show hostname $SLURM_NODELIST))
+nnodes=${#nodes[@]}
+last=$(( $nnodes - 1 ))
+
+echo -n "starting spark master on $MASTER... ";
+$SPARK_HOME/sbin/start-master.sh
+PORT=7077
+export MASTER="spark://${nodes[0]}:$PORT"
+echo "done";
+sleep 2;
+echo "spark cluster web interface: http://${nodes[0]}:8080"  >$HOME/spark-info
+echo "           spark master URL: spark://${nodes[0]}:7077" >>$HOME/spark-info
+
+
+i=0
+echo starting on-node worker
+nohup ${SPARK_HOME}/sbin/start-slave.sh -c 16 -m 64G ${MASTER}
+
+echo opening ssh connections to start the other nodes\' worker processeses
+
+for i in $( seq 1 $last )
+do
+    ssh ${nodes[i]} hostname
+done
+
+echo starting remote workers
+
+for i in $( seq 1 $last )
+do
+   # /usr/bin/ssh ${nodes[$i]} "module load pre2019 spark java/oracle/8u73 python ; nohup $SPARK_HOME/sbin/start-slave.sh -c 16 -m 64G ${MASTER}; echo ${nodes[$i]} " &
+    /usr/bin/ssh ${nodes[$i]} "module load pre2019 java/oracle/8u73 python ; SPARK_HOME=~/tahmad/spark; export PATH=$SPARK_HOME/bin:$PATH; nohup $SPARK_HOME/sbin/start-slave.sh -c 16 -m 64G ${MASTER}; echo ${nodes[$i]} " &
+
+done
+
+echo "spark cluster ready: type 'export MASTER=$MASTER', then 'pyspark'."
+
+export MASTER=$MASTER
+pyspark
+
+cd $HOME/mcx/Spark/SparkGA1
+#python runPart.py config/config.xml 1
+python runAll.py config/config.xml
+
+#$SPARK_HOME/bin/spark-submit $SPARK_HOME/examples/src/main/python/pi.py 
