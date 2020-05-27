@@ -1,8 +1,8 @@
 #!/bin/bash 
-#SBATCH -N 3                           #request 3 nodes
-#SBATCH -t 1:10:00                  #job to run for 10 minutes
-#SBATCH --ntasks-per-node 6   #4 tasks per node
-#SBATCH --cpus-per-task 4       #4 cpus per task
+#SBATCH -N 6
+#SBATCH -t 3:00:00
+#SBATCH --ntasks-per-node 6
+#SBATCH --cpus-per-task 4
 #SBATCH --output=spark.out
 
 module load pre2019
@@ -53,7 +53,7 @@ export MASTER=$MASTER
 pyspark
 
 cd $HOME/mcx/Spark/SparkGA1
-#python runPart.py config/config.xml 1
-python runAll.py config/config.xml
+python runPart.py config/config.xml 1
+python runPart.py config/config.xml 2
 
 #$SPARK_HOME/bin/spark-submit $SPARK_HOME/examples/src/main/python/pi.py 

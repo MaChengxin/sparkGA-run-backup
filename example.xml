@@ -1,7 +1,7 @@
 <configuration>
-	<fastq1Path>/home/tahmad/mcx/bio_data/ERR001268/ERR001268_1.filt.fastq</fastq1Path>
+	<fastq1Path>/scratch-shared/tahmad/bio_data/FASTQ/U0a_CGATGT_R1.fastq</fastq1Path>
 	<!-- fastq2Path should be left empty (<fastq2Path></fastq2Path>) for a single ended input -->
-	<fastq2Path>/home/tahmad/mcx/bio_data/ERR001268/ERR001268_2.filt.fastq</fastq2Path>
+	<fastq2Path>/scratch-shared/tahmad/bio_data/FASTQ/U0a_CGATGT_R2.fastq</fastq2Path>
 	<outputFolder>local:chunks</outputFolder> 
 	<compLevel>4</compLevel>
 	<chunkSizeMB>60</chunkSizeMB>
